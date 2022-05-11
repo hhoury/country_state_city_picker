@@ -10,28 +10,23 @@ import 'model/select_status_model.dart' as StatusModel;
 class SelectState extends StatefulWidget {
   final ValueChanged<String> onCountryChanged;
   final ValueChanged<String> onStateChanged;
-  final ValueChanged<String> onCityChanged;
-  final VoidCallback? onCountryTap;
-  final VoidCallback? onStateTap;
-  final VoidCallback? onCityTap;
+  // final ValueChanged<String> onCityChanged;
   final TextStyle? style;
   final Color? dropdownColor;
-  final InputDecoration decoration;
-  final double spacing;
+  final String selectedCountry;
+  final String selectedState;
+  // final String selectedCity;
 
-  const SelectState(
+  SelectState(
       {Key? key,
       required this.onCountryChanged,
       required this.onStateChanged,
-      required this.onCityChanged,
-      this.decoration =
-          const InputDecoration(contentPadding: EdgeInsets.all(0.0)),
-      this.spacing = 0.0,
+      // required this.onCityChanged,
+      this.selectedCountry = '',
+      this.selectedState = '',
+      // this.selectedCity = '',
       this.style,
-      this.dropdownColor,
-      this.onCountryTap,
-      this.onStateTap,
-      this.onCityTap})
+      this.dropdownColor})
       : super(key: key);
 
   @override
@@ -39,18 +34,30 @@ class SelectState extends StatefulWidget {
 }
 
 class _SelectStateState extends State<SelectState> {
-  List<String> _cities = ["Choose City"];
+  // List<String> _cities = ["Choose City"];
   List<String> _country = ["Choose Country"];
-  String _selectedCity = "Choose City";
+  // String _selectedCity = "Choose City";
   String _selectedCountry = "Choose Country";
-  String _selectedState = "Choose State/Province";
-  List<String> _states = ["Choose State/Province"];
+  String _selectedState = "Choose State";
+  List<String> _states = ["Choose State"];
   var responses;
 
   @override
   void initState() {
-    getCounty();
     super.initState();
+    _selectedCountry = "Choose Country";
+    getCountry();
+    // _selectedCity = _cities[this.widget.selectedCity];
+    if (this.widget.selectedCountry.isNotEmpty) {
+      _selectedCountry = this.widget.selectedCountry;
+      getState();
+      _selectedState = this.widget.selectedState;
+    }
+
+    // _selectedState = _states[widget.selectedState];
+
+    // getState();
+    // getCity();
   }
 
   Future getResponse() async {
@@ -59,7 +66,7 @@ class _SelectStateState extends State<SelectState> {
     return jsonDecode(res);
   }
 
-  Future getCounty() async {
+  Future getCountry() async {
     var countryres = await getResponse() as List;
     countryres.forEach((data) {
       var model = StatusModel.StatusModel();
@@ -87,7 +94,7 @@ class _SelectStateState extends State<SelectState> {
       setState(() {
         var name = f.map((item) => item.name).toList();
         for (var statename in name) {
-          print(statename.toString());
+          // print(statename.toString());
 
           _states.add(statename.toString());
         }
@@ -97,37 +104,37 @@ class _SelectStateState extends State<SelectState> {
     return _states;
   }
 
-  Future getCity() async {
-    var response = await getResponse();
-    var takestate = response
-        .map((map) => StatusModel.StatusModel.fromJson(map))
-        .where((item) => item.emoji + "    " + item.name == _selectedCountry)
-        .map((item) => item.state)
-        .toList();
-    var states = takestate as List;
-    states.forEach((f) {
-      var name = f.where((item) => item.name == _selectedState);
-      var cityname = name.map((item) => item.city).toList();
-      cityname.forEach((ci) {
-        if (!mounted) return;
-        setState(() {
-          var citiesname = ci.map((item) => item.name).toList();
-          for (var citynames in citiesname) {
-            print(citynames.toString());
+  // Future getCity() async {
+  //   var response = await getResponse();
+  //   var takestate = response
+  //       .map((map) => StatusModel.StatusModel.fromJson(map))
+  //       .where((item) => item.emoji + "    " + item.name == _selectedCountry)
+  //       .map((item) => item.state)
+  //       .toList();
+  //   var states = takestate as List;
+  //   states.forEach((f) {
+  //     var name = f.where((item) => item.name == _selectedState);
+  //     var cityname = name.map((item) => item.city).toList();
+  //     cityname.forEach((ci) {
+  //       if (!mounted) return;
+  //       setState(() {
+  //         var citiesname = ci.map((item) => item.name).toList();
+  //         for (var citynames in citiesname) {
+  //           // print(citynames.toString());
 
-            _cities.add(citynames.toString());
-          }
-        });
-      });
-    });
-    return _cities;
-  }
+  //           _cities.add(citynames.toString());
+  //         }
+  //       });
+  //     });
+  //   });
+  //   return _cities;
+  // }
 
   void _onSelectedCountry(String value) {
     if (!mounted) return;
     setState(() {
-      _selectedState = "Choose  State/Province";
-      _states = ["Choose  State/Province"];
+      _selectedState = "Choose State";
+      _states = ["Choose State"];
       _selectedCountry = value;
       this.widget.onCountryChanged(value);
       getState();
@@ -137,116 +144,89 @@ class _SelectStateState extends State<SelectState> {
   void _onSelectedState(String value) {
     if (!mounted) return;
     setState(() {
-      _selectedCity = "Choose City";
-      _cities = ["Choose City"];
+      // _selectedCity = "Choose City";
+      // _cities = ["Choose City"];
       _selectedState = value;
       this.widget.onStateChanged(value);
-      getCity();
+      // getCity();
     });
   }
 
-  void _onSelectedCity(String value) {
-    if (!mounted) return;
-    setState(() {
-      _selectedCity = value;
-      this.widget.onCityChanged(value);
-    });
-  }
+  // void _onSelectedCity(String value) {
+  //   if (!mounted) return;
+  //   setState(() {
+  //     _selectedCity = value;
+  //     this.widget.onCityChanged(value);
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        InputDecorator(
-          decoration: widget.decoration,
-          child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-            dropdownColor: widget.dropdownColor,
-            isExpanded: true,
-            items: _country.map((String dropDownStringItem) {
-              return DropdownMenuItem<String>(
-                value: dropDownStringItem,
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        dropDownStringItem,
-                        style: widget.style,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    )
-                  ],
-                ),
-              );
-            }).toList(),
-            // onTap: ,
-            onChanged: (value) => _onSelectedCountry(value!),
-            onTap: widget.onCountryTap,
-            // onChanged: (value) => _onSelectedCountry(value!),
-            value: _selectedCountry,
-          )),
+        Text('Country', style: Theme.of(context).textTheme.labelMedium),
+        SizedBox(
+          height: 10.0,
+        ),
+        DropdownButtonFormField<String>(
+          dropdownColor: Theme.of(context).colorScheme.background,
+          isExpanded: true,
+          items: _country.map((String dropDownStringItem) {
+            return DropdownMenuItem<String>(
+              value: dropDownStringItem,
+              child: Row(
+                children: [
+                  Text(
+                    dropDownStringItem,
+                    style: widget.style,
+                  )
+                ],
+              ),
+            );
+          }).toList(),
+          onChanged: (value) => _onSelectedCountry(value!),
+          value: _selectedCountry,
         ),
         SizedBox(
-          height: widget.spacing,
+          height: 20.0,
         ),
-        InputDecorator(
-          decoration: widget.decoration,
-          child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-            dropdownColor: widget.dropdownColor,
-            isExpanded: true,
-            items: _states.map((String dropDownStringItem) {
-              return DropdownMenuItem<String>(
-                value: dropDownStringItem,
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        dropDownStringItem,
-                        style: widget.style,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    )
-                  ],
-                ),
-              );
-            }).toList(),
-            onChanged: (value) => _onSelectedState(value!),
-            onTap: widget.onStateTap,
-            value: _selectedState,
-          )),
-        ),
+        Text('State', style: Theme.of(context).textTheme.labelMedium),
         SizedBox(
-          height: widget.spacing,
+          height: 10.0,
         ),
-        InputDecorator(
-          decoration: widget.decoration,
-          child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-            dropdownColor: widget.dropdownColor,
-            isExpanded: true,
-            items: _cities.map((String dropDownStringItem) {
-              return DropdownMenuItem<String>(
-                value: dropDownStringItem,
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        dropDownStringItem,
-                        style: widget.style,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    )
-                  ],
-                ),
-              );
-            }).toList(),
-            onChanged: (value) => _onSelectedCity(value!),
-            onTap: widget.onCityTap,
-            value: _selectedCity,
-          )),
+        DropdownButtonFormField<String>(
+          dropdownColor: widget.dropdownColor,
+          isExpanded: true,
+          items: _states.map((String dropDownStringItem) {
+            return DropdownMenuItem<String>(
+              value: dropDownStringItem,
+              child: Text(dropDownStringItem, style: widget.style),
+            );
+          }).toList(),
+          onChanged: (value) => _onSelectedState(value!),
+          value: _selectedState,
         ),
+        // SizedBox(
+        //   height: 20.0,
+        // ),
+        // Text('City', style: Theme.of(context).textTheme.labelMedium),
+        // SizedBox(
+        //   height: 10.0,
+        // ),
+        // DropdownButtonFormField<String>(
+        //   dropdownColor: widget.dropdownColor,
+        //   isExpanded: true,
+        //   items: _cities.map((String dropDownStringItem) {
+        //     return DropdownMenuItem<String>(
+        //       value: dropDownStringItem,
+        //       child: Text(dropDownStringItem, style: widget.style),
+        //     );
+        //   }).toList(),
+        //   onChanged: (value) => _onSelectedCity(value!),
+        //   value: _selectedCity,
+        // ),
       ],
     );
   }
