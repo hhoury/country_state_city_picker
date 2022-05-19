@@ -71,10 +71,11 @@ class _SelectStateState extends State<SelectState> {
     countryres.forEach((data) {
       var model = StatusModel.StatusModel();
       model.name = data['name'];
-      model.emoji = data['emoji'];
+      // model.emoji = data['emoji'];
       if (!mounted) return;
       setState(() {
-        _country.add(model.emoji! + "    " + model.name!);
+        _country.add(model.name!);
+        // _country.add(model.emoji! + "    " + model.name!);
       });
     });
 
@@ -85,7 +86,8 @@ class _SelectStateState extends State<SelectState> {
     var response = await getResponse();
     var takestate = response
         .map((map) => StatusModel.StatusModel.fromJson(map))
-        .where((item) => item.emoji + "    " + item.name == _selectedCountry)
+        .where((item) => item.name == _selectedCountry)
+        // .where((item) => item.emoji + "    " + item.name == _selectedCountry)
         .map((item) => item.state)
         .toList();
     var states = takestate as List;
